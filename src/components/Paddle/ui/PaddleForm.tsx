@@ -1,30 +1,57 @@
 "use client";
 
-import { initializePaddle, Paddle } from "@paddle/paddle-js";
-import { useEffect, useRef } from "react";
+import { Button } from "@/components/button";
+import { Modal } from "@/components/ui/modal";
+import { initializePaddle } from "@paddle/paddle-js";
+import { useEffect, useState } from "react";
 
 function PaddleForm() {
-  const paddleRef = useRef<Paddle>(null);
-  useEffect(() => {
-   
+  const initialize = () => {
     initializePaddle({
       environment: "sandbox",
-      token: process.env.NEXT_PUBLIC_CLIENT_TOKEN,
+      token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN,
       debug: true,
     }).then((instance) => {
       if (instance) {
-        paddleRef.current = instance;
         instance.Checkout.open({
-          items: [{ priceId: "pri_01jrff3wvrg0k3rde8gkbnm8v2", quantity: 1 }],
-
-         
+          settings: {
+            displayMode: "inline",
+            frameTarget: "checkout-container",
+            frameInitialHeight: 632,
+            frameStyle:
+              "width: 100%; background: transparent; border: none; min-height: 300px",
+          },
+          items: [
+            {
+              priceId: "pri_01jrjy81mw2hnvz9xf6h8qwvjy",
+              quantity: 1,
+            },
+          ],
         });
       } else {
-        console.error("paddle instance is:", instance);
+        console.warn("instance is not initialized:", instance);
       }
     });
+  };
+
+  useEffect(() => {
+    initialize();
   }, []);
-  return <div>PaddleForm</div>;
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <>
+      <Modal title="Modal" isOpen={isOpen} onClose={() => setIsOpen(false)}>
+        <div className="checkout-container"></div>
+      </Modal>
+      <Button
+        onClick={() => {
+          setIsOpen(true);
+        }}
+      >
+        Open Modal
+      </Button>
+    </>
+  );
 }
 
 export default PaddleForm;
